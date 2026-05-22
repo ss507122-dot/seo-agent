@@ -49,7 +49,7 @@ TEXT:
 
 Return STRICT JSON: {{"rewritten_html":"..."}}"""
 
-SITEMAP_INTERNAL_LINKING_RULES:
+SITEMAP_INTERNAL_LINKING_RULES = """
 You must use the actual website structure from https://medzpalace.com/sitemap_index.xml to insert real, live internal links. When writing content, automatically wrap the following key product terms in clean HTML anchor tags using these exact URL patterns:
 
 1. For Erectile Dysfunction / Men's Health topics:
@@ -65,3 +65,4 @@ You must use the actual website structure from https://medzpalace.com/sitemap_in
 3. Link Insertion Rule:
    - Do not hallucinate links. Only link the exact keywords mentioned above to their respective URLs.
    - Insert links naturally into the text context maximum 2-3 times per 800 words to maintain high-quality On-Page SEO structure.
+"""

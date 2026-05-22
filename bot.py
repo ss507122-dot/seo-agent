@@ -64,19 +64,6 @@ async def whoami(update, ctx):
     else:
         await update.message.reply_text(f"❌ WP {code}: {esc(str(data)[:300])}", parse_mode=ParseMode.HTML)
 
-def get_professional_image_url(data, topic):
-    """
-    Gemini ke output se image prompt nikal kar title ke hisab se professional
-    medical image ka url pass karne ke liye safe helper function.
-    """
-    # Agar Gemini response me image prompt alag se de raha hai toh use uthayein
-    img_prompt = data.get("image_prompt") or f"A professional high-resolution studio photograph of a clean, modern clinical pharmacy setting with branded medicine box for {topic}, WebP digital commercial photography."
-    
-    # Yahan stability AI ya direct high-quality placeholder system connect ho jata hai
-    # Filhal hum isko dynamic integration url standard par bhej rahe hain jo automatic image fetch karega
-    encoded_prompt = requests.utils.quote(img_prompt) if hasattr(requests, 'utils') else topic.replace(" ", "_")
-    return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1200&height=630&nologo=true&private=true"
-
 
 def parse_pipe(text, n):
     parts = [p.strip() for p in text.split("|")]

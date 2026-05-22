@@ -22,6 +22,9 @@ def create_post(title, content, status="draft", categories=None, tags=None,
     if categories: payload["categories"] = categories
     if tags: payload["tags"] = tags
     if meta: payload["meta"] = meta
+    if "featured_image_url" in locals() or "featured_image_url" in globals():
+        media_id = upload_image_from_url(featured_image_url, title)
+    if media_id: payload["featured_media"] = media_id
     r = requests.post(f"{BASE}/wp-json/wp/v2/posts", json=payload, auth=AUTH, headers=H, timeout=60)
     r.raise_for_status()
     return r.json()

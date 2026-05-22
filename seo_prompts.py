@@ -37,7 +37,7 @@ Return STRICT JSON ONLY:
 META_PROMPT = """Generate SEO meta for medzpalace.com (online pharmacy) for topic: "{topic}"
 Return STRICT JSON: {{"meta_title":"<=60 char","meta_description":"<=155 char","focus_keyword":"2-4 words"}}"""
 
-KEYWORDS_PROMPT = """List 25 high-intent SEO keywords for an Indian online pharmacy targeting: "{topic}"
+KEYWORDS_PROMPT = """List 25 high-intent SEO keywords for an online pharmacy targeting: "{topic}"
 Return STRICT JSON: {{"keywords":[{{"kw":"...","intent":"informational|transactional|commercial","volume_guess":"low|mid|high"}}]}}"""
 
 FAQ_PROMPT = """Create 8 high-quality SEO FAQ items for medzpalace.com on: "{topic}"
@@ -48,3 +48,20 @@ TEXT:
 {text}
 
 Return STRICT JSON: {{"rewritten_html":"..."}}"""
+
+SITEMAP_INTERNAL_LINKING_RULES:
+You must use the actual website structure from https://medzpalace.com/sitemap_index.xml to insert real, live internal links. When writing content, automatically wrap the following key product terms in clean HTML anchor tags using these exact URL patterns:
+
+1. For Erectile Dysfunction / Men's Health topics:
+   - "Cenforce" or "Cenforce 100" -> <a href="https://medzpalace.com/product/cenforce-100-mg/">Cenforce 100</a>
+   - "Vidalista" or "Vidalista 20" -> <a href="https://medzpalace.com/product/vidalista-20-mg/">Vidalista 20</a>
+   - "Fildena" -> <a href="https://medzpalace.com/product/fildena-100-mg/">Fildena 100</a>
+   - "Kamagra" -> <a href="https://medzpalace.com/product/kamagra-100-mg/">Kamagra 100</a>
+
+2. For General Categories:
+   - "Erectile Dysfunction" -> <a href="https://medzpalace.com/product-category/erectile-dysfunction/">Erectile Dysfunction</a>
+   - "Men's Health" -> <a href="https://medzpalace.com/product-category/mens-health/">Men's Health</a>
+
+3. Link Insertion Rule:
+   - Do not hallucinate links. Only link the exact keywords mentioned above to their respective URLs.
+   - Insert links naturally into the text context maximum 2-3 times per 800 words to maintain high-quality On-Page SEO structure.

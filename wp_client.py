@@ -11,8 +11,27 @@ def whoami():
     r = requests.get(f"{BASE}/wp-json/wp/v2/users/me", auth=AUTH, timeout=30)
     return r.status_code, r.json() if r.headers.get("content-type","").startswith("application/json") else r.text
 
+def upload_image_from_url(image_url, title="Feature Image"):
+    """
+    Image URL se image download karke WordPress Media Library me upload karne ka function.
+    """
+    try:
+        img_resp = requests.get(image_url, timeout=30)
+        img_resp.raise_for_status()
+        filename = f"{title.lower().replace(' ', '_')[:20]}.jpg"
+        media_headers = {
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Content-Type": "image/jpeg"
+        }
+        r = requests.post(f"{BASE}/wp-json/wp/v2/media", data=img_resp.content, auth=AUTH, headers=media_headers, timeout=60)
+        r.raise_for_status()
+        return r.json().get("id")
+    except Exception as e:
+        print(f"Image upload error: {e}")
+        return None
+
 def create_post(title, content, status="draft", categories=None, tags=None,
-                rm_title=None, rm_desc=None, rm_focus=None, excerpt=None):
+                rm_title=None, rm_desc=None, rm_focus=None, excerpt=None, featured_image_url=None):
     meta = {}
     if rm_title: meta["rank_math_title"] = rm_title
     if rm_desc:  meta["rank_math_description"] = rm_desc
@@ -22,9 +41,13 @@ def create_post(title, content, status="draft", categories=None, tags=None,
     if categories: payload["categories"] = categories
     if tags: payload["tags"] = tags
     if meta: payload["meta"] = meta
-    if "featured_image_url" in locals() or "featured_image_url" in globals():
+    
+    # Image upload system
+    if featured_image_url:
         media_id = upload_image_from_url(featured_image_url, title)
-    if media_id: payload["featured_media"] = media_id
+        if media_id: 
+            payload["featured_media"] = media_id
+            
     r = requests.post(f"{BASE}/wp-json/wp/v2/posts", json=payload, auth=AUTH, headers=H, timeout=60)
     r.raise_for_status()
     return r.json()
@@ -84,19 +107,3 @@ def update_product_meta(product_id, rm_title=None, rm_desc=None, rm_focus=None):
     r = requests.put(f"{BASE}/wp-json/wc/v3/products/{product_id}", json={"meta_data": meta_data}, auth=AUTH, headers=H, timeout=60)
     r.raise_for_status()
     return r.json()
-
-def upload_image_from_url(image_url, title="Feature Image"):
-    try:
-        img_resp = requests.get(image_url, timeout=30)
-        img_resp.raise_for_status()
-        filename = f"{title.lower().replace(' ', '_')[:20]}.jpg"
-        media_headers = {
-            "Content-Disposition": f'attachment; filename="{filename}"',
-            "Content-Type": "image/jpeg"
-        }
-        r = requests.post(f"{BASE}/wp-json/wp/v2/media", data=img_resp.content, auth=AUTH, headers=media_headers, timeout=60)
-        r.raise_for_status()
-        return r.json().get("id")
-    except Exception as e:
-        print(f"Image upload error: {e}")
-        return None

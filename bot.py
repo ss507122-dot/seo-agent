@@ -1,4 +1,4 @@
-import os, json, logging, html, asyncio
+import os, json, logging, html, asyncio, requests
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -27,6 +27,14 @@ async def guard(update: Update) -> bool:
 
 def esc(s: str) -> str:
     return html.escape(str(s) if s is not None else "")
+
+def get_professional_image_url(data, topic):
+    """
+    Gemini ke output se image prompt nikal kar professional title-based image link generate karne ka function.
+    """
+    img_prompt = data.get("image_prompt") or f"A professional high-resolution studio photograph of a clean, modern clinical pharmacy setting with branded medicine box for {topic}, WebP digital commercial photography."
+    encoded_prompt = requests.utils.quote(img_prompt) if hasattr(requests, 'utils') else topic.replace(" ", "_")
+    return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1200&height=630&nologo=true&private=true"
 
 async def start(update, ctx):
     if not await guard(update): return
@@ -64,7 +72,6 @@ async def whoami(update, ctx):
     else:
         await update.message.reply_text(f"❌ WP {code}: {esc(str(data)[:300])}", parse_mode=ParseMode.HTML)
 
-
 def parse_pipe(text, n):
     parts = [p.strip() for p in text.split("|")]
     if len(parts) < n: return None
@@ -82,11 +89,17 @@ async def blog(update, ctx):
     await update.message.reply_text(f"✍️ Writing blog… ({esc(words)} words)\nTopic: {esc(topic)}", parse_mode=ParseMode.HTML)
     try:
         data = gc.generate_json(P.BLOG_PROMPT.format(topic=topic, keyword=keyword, words=words))
+        
+        # Dynamic image url generation based on title/prompt
+        img_url = get_professional_image_url(data, topic)
+        
         post = wp.create_post(
             title=data["title"], content=data["content_html"], status="draft",
             excerpt=data.get("excerpt"),
             rm_title=data.get("meta_title"), rm_desc=data.get("meta_description"),
-            rm_focus=data.get("focus_keyword"))
+            rm_focus=data.get("focus_keyword"),
+            featured_image_url=img_url)
+            
         link = post.get("link") or f"https://medzpalace.com/?p={post['id']}"
         await update.message.reply_text(
             f"✅ Draft created (ID <b>{post['id']}</b>)\n<b>Title:</b> {esc(data['title'])}\n"
@@ -168,7 +181,6 @@ async def seoproduct(update, ctx):
         await update.message.reply_text("Usage: /seoproduct PRODUCT_ID"); return
     try:
         pid = int(parts[1])
-        prods = wp.list_products(1, search=None)
         import requests
         from requests.auth import HTTPBasicAuth
         base = os.getenv("WP_BASE_URL").rstrip("/")
@@ -265,9 +277,13 @@ async def bulkblog(update, ctx):
         if not topic: continue
         try:
             d = gc.generate_json(P.BLOG_PROMPT.format(topic=topic, keyword=kw, words=w))
+            
+            img_url = get_professional_image_url(d, topic)
+            
             post = wp.create_post(title=d["title"], content=d["content_html"], status="draft",
                                   excerpt=d.get("excerpt"), rm_title=d.get("meta_title"),
-                                  rm_desc=d.get("meta_description"), rm_focus=d.get("focus_keyword"))
+                                  rm_desc=d.get("meta_description"), rm_focus=d.get("focus_keyword"),
+                                  featured_image_url=img_url)
             ok += 1
             await update.message.reply_text(f"✅ {i}/{len(rows)} → post {post['id']} ({esc(topic)[:60]})", parse_mode=ParseMode.HTML)
         except Exception as e:

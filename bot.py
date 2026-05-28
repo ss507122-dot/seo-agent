@@ -296,10 +296,10 @@ async def bulkblog(update, ctx):
 
 async def linkposts_cmd(update, ctx):
     if not await guard(update): return
-    await update.message.reply_text("🔗 Internal linking shuru ho raha hai...")
+    await update.message.reply_text("🔗 Internal linking started...")
     try:
         IL.run(dry_run=False, post_types=["posts", "pages"])
-        await update.message.reply_text("✅ Internal links inject ho gaye!")
+        await update.message.reply_text("✅ Internal links injected successfully!")
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {esc(str(e))[:400]}")
 

@@ -20,7 +20,8 @@ Product: {name}
 Active ingredient: {salt}
 Pack: {pack}
 Category/use: {category}
-Price (INR): {price}
+Price (USD): {price}
+Delivery Time: 6 To 15 Days
 
 Return STRICT JSON ONLY:
 {{

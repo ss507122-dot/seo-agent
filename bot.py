@@ -107,6 +107,8 @@ async def blog(update, ctx):
             f"<b>Meta:</b> {esc(data.get('meta_title'))}\n<b>Focus KW:</b> {esc(data.get('focus_keyword'))}\n"
             f"🔗 {esc(link)}\n\nReview & publish from WP dashboard.",
             parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+
+IL.run(dry_run=False, post_types=["posts"])    
     except Exception as e:
         log.exception("blog failed")
         await update.message.reply_text(f"❌ Error: {esc(str(e))[:500]}")

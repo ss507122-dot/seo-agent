@@ -9,6 +9,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 import gemini_client as gc
 import wp_client as wp
 import seo_prompts as P
+import internal_linker as IL
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.INFO)
 log = logging.getLogger("seo-bot")
@@ -291,6 +292,19 @@ async def bulkblog(update, ctx):
             await update.message.reply_text(f"❌ {i}/{len(rows)} {esc(topic)[:40]}: {esc(str(e))[:200]}", parse_mode=ParseMode.HTML)
     await update.message.reply_text(f"🏁 Done. ✅ {ok}   ❌ {fail}")
 
+
+
+async def linkposts_cmd(update, ctx):
+    if not await guard(update): return
+    await update.message.reply_text("🔗 Internal linking shuru ho raha hai...")
+    try:
+        IL.run(dry_run=False, post_types=["posts", "pages"])
+        await update.message.reply_text("✅ Internal links inject ho gaye!")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {esc(str(e))[:400]}")
+
+
+
 async def fallback(update, ctx):
     if not await guard(update): return
     await update.message.reply_text("Type /help to see commands.")
@@ -314,6 +328,7 @@ def main():
     app.add_handler(CommandHandler("faq", faq_cmd))
     app.add_handler(CommandHandler("rewrite", rewrite))
     app.add_handler(CommandHandler("bulkblog", bulkblog))
+    app.add_handler(CommandHandler("linkposts", linkposts_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, fallback))
     log.info("Bot starting (long-poll)…")
     app.run_polling(allowed_updates=Update.ALL_TYPES)

@@ -149,3 +149,11 @@ def clone_product(template_id, name, active_ingredient, indication,
         requests.post(f"{BASE}/wp-json/wc/v3/products/{new_id}/variations", json=v_payload, auth=AUTH, headers=H, timeout=30)
     
     return r.json()
+
+def find_template_by_keyword(keyword):
+    r = requests.get(f"{BASE}/wp-json/wc/v3/products",
+                     params={"search": keyword, "per_page": 5, "status": "publish"},
+                     auth=AUTH, timeout=30)
+    r.raise_for_status()
+    results = r.json()
+    return results[0]["id"] if results else None

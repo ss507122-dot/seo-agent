@@ -21,20 +21,20 @@ Active ingredient: {salt}
 Pack: {pack}
 Category/use: {category}
 Price (USD): {price}
-Delivery Time: 6 To 15 Days
 
 Return STRICT JSON ONLY:
 {{
   "name": "{name}",
   "short_description_html": "2-3 line HTML summary",
-  "long_description_html": "300-500 word HTML with <h3>Description</h3>, <h3>How to use</h3>, <h3>Benefits</h3>, <h3>Side effects</h3>, <h3>Storage</h3>, <h3>FAQ</h3> with 3 Qs, end with disclaimer",
+  "long_description_html": "Full HTML with this exact structure:
+<table><tr><th>Active Ingredient</th><td>{salt}</td></tr><tr><th>Indication</th><td>{category}</td></tr><tr><th>Manufacturer</th><td>Research and fill real manufacturer</td></tr><tr><th>Packaging</th><td>{pack}</td></tr><tr><th>Strength</th><td>Extract from product name</td></tr><tr><th>Delivery Time</th><td>6 To 15 Days</td></tr></table>
+Then add: <h3>Description</h3>, <h3>How to use</h3>, <h3>Benefits</h3>, <h3>Side effects</h3>, <h3>Storage</h3>, <h3>FAQ</h3> with 3 Qs, end with disclaimer",
   "meta_title": "<=60 char including product + keyword",
   "meta_description": "<=155 char with CTA",
   "focus_keyword": "primary keyword 2-4 words",
   "sku": "short SKU like MZ-XXX-000",
   "tags": ["t1","t2","t3"]
 }}"""
-
 META_PROMPT = """Generate SEO meta for medzpalace.com (online pharmacy) for topic: "{topic}"
 Return STRICT JSON: {{"meta_title":"<=60 char","meta_description":"<=155 char","focus_keyword":"2-4 words"}}"""
 

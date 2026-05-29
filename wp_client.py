@@ -110,26 +110,42 @@ def update_product_meta(product_id, rm_title=None, rm_desc=None, rm_focus=None):
 def clone_product(template_id, name, active_ingredient, indication,
                   manufacturer, packaging, price, sku=None,
                   rm_title=None, rm_desc=None, rm_focus=None):
+    # Template fetch
+    t = requests.get(f"{BASE}/wp-json/wc/v3/products/{template_id}", auth=AUTH, timeout=30).json()
+    t_vars = requests.get(f"{BASE}/wp-json/wc/v3/products/{template_id}/variations", auth=AUTH, params={"per_page":50}, timeout=30).json()
+    
     meta_data = []
     if rm_title: meta_data.append({"key":"rank_math_title","value":rm_title})
     if rm_desc:  meta_data.append({"key":"rank_math_description","value":rm_desc})
     if rm_focus: meta_data.append({"key":"rank_math_focus_keyword","value":rm_focus})
+    
     attributes = [
         {"name":"Active Ingredient:","options":[active_ingredient],"visible":True},
         {"name":"Indication:","options":[indication],"visible":True},
         {"name":"Manufacturer:","options":[manufacturer],"visible":True},
         {"name":"Packaging:","options":[packaging],"visible":True},
         {"name":"Delivery Time","options":["6 To 15 Days"],"visible":True},
+        {"name":"Quantity","options":[v["attributes"][0]["option"] for v in t_vars if v.get("attributes")],"visible":True,"variation":True},
     ]
+    
     payload = {
-        "name": name,
-        "type": "simple",
-        "status": "draft",
-        "regular_price": str(price),
+        "name": name, "type": "variable",
+        "status": "draft", "regular_price": str(price),
         "attributes": attributes,
     }
     if sku: payload["sku"] = sku
     if meta_data: payload["meta_data"] = meta_data
+    
     r = requests.post(f"{BASE}/wp-json/wc/v3/products", json=payload, auth=AUTH, headers=H, timeout=60)
     r.raise_for_status()
+    new_id = r.json()["id"]
+    
+    # Variations copy
+    for v in t_vars:
+        v_payload = {
+            "regular_price": v.get("regular_price","0"),
+            "attributes": v.get("attributes",[]),
+        }
+        requests.post(f"{BASE}/wp-json/wc/v3/products/{new_id}/variations", json=v_payload, auth=AUTH, headers=H, timeout=30)
+    
     return r.json()

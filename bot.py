@@ -303,6 +303,30 @@ async def linkposts_cmd(update, ctx):
         await update.message.reply_text("✅ Internal links injected successfully!")
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {esc(str(e))[:400]}")
+async def cloneproduct_cmd(update, ctx):
+    if not await guard(update): return
+    raw = update.message.text.split(" ", 1)
+    if len(raw) < 2:
+        await update.message.reply_text("Usage: /cloneproduct Name | Active Ingredient | Indication | Manufacturer | Packaging | Price"); return
+    parts = parse_pipe(raw[1], 6)
+    if not parts:
+        await update.message.reply_text("6 values chahiye pipe se alag"); return
+    name, salt, indication, manufacturer, packaging, price = parts[:6]
+    await update.message.reply_text(f"🛒 Cloning product: {esc(name)}...")
+    try:
+        meta = gc.generate_json(P.META_PROMPT.format(topic=name))
+        prod = wp.clone_product(
+            template_id=512957,
+            name=name, active_ingredient=salt,
+            indication=indication, manufacturer=manufacturer,
+            packaging=packaging, price=price,
+            rm_title=meta["meta_title"], rm_desc=meta["meta_description"],
+            rm_focus=meta["focus_keyword"])
+        await update.message.reply_text(
+            f"✅ Product draft ready (ID <b>{prod['id']}</b>)\n🔗 {esc(prod.get('permalink'))}",
+            parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+    except Exception as e:
+        await update.message.reply_text(f"❌ {esc(str(e))[:400]}")
 
 
 
@@ -330,6 +354,7 @@ def main():
     app.add_handler(CommandHandler("rewrite", rewrite))
     app.add_handler(CommandHandler("bulkblog", bulkblog))
     app.add_handler(CommandHandler("linkposts", linkposts_cmd))
+    app.add_handler(CommandHandler("cloneproduct", cloneproduct_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, fallback))
     log.info("Bot starting (long-poll)…")
     app.run_polling(allowed_updates=Update.ALL_TYPES)

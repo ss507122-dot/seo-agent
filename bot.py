@@ -312,8 +312,6 @@ async def cloneproduct_cmd(update, ctx):
     if not parts:
         await update.message.reply_text("6 values chahiye pipe se alag"); return
     name, salt, indication, manufacturer, packaging, price = parts[:6]
-    template_keyword = parts[6] if len(parts) > 6 else "tablet"
-        template_id = wp.find_template_by_keyword(template_keyword) or 512957
     await update.message.reply_text(f"🛒 Cloning product: {esc(name)}...")
     try:
         meta = gc.generate_json(P.META_PROMPT.format(topic=name))

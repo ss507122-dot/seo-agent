@@ -316,7 +316,7 @@ async def cloneproduct_cmd(update, ctx):
     try:
         meta = gc.generate_json(P.META_PROMPT.format(topic=name))
         prod = wp.clone_product(
-            template_id=template_id,
+            template_id=512957,
             name=name, active_ingredient=salt,
             indication=indication, manufacturer=manufacturer,
             packaging=packaging, price=price,

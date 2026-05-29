@@ -127,7 +127,7 @@ def clone_product(template_id, name, active_ingredient, indication,
     payload = {
         "name": name, "type": t.get("type","simple"),
         "status": "draft", "regular_price": str(price),
-        "description": table + t.get("description",""),
+        "description": table,
         "short_description": t.get("short_description",""),
         "categories": t.get("categories",[]),
     }

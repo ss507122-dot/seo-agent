@@ -107,3 +107,32 @@ def update_product_meta(product_id, rm_title=None, rm_desc=None, rm_focus=None):
     r = requests.put(f"{BASE}/wp-json/wc/v3/products/{product_id}", json={"meta_data": meta_data}, auth=AUTH, headers=H, timeout=60)
     r.raise_for_status()
     return r.json()
+def clone_product(template_id, name, active_ingredient, indication,
+                  manufacturer, packaging, price, sku=None,
+                  rm_title=None, rm_desc=None, rm_focus=None):
+    r = requests.get(f"{BASE}/wp-json/wc/v3/products/{template_id}", auth=AUTH, timeout=30)
+    r.raise_for_status()
+    t = r.json()
+    table = f"""<table>
+<tr><th>Active Ingredient:</th><td>{active_ingredient}</td></tr>
+<tr><th>Indication:</th><td>{indication}</td></tr>
+<tr><th>Manufacturer:</th><td>{manufacturer}</td></tr>
+<tr><th>Packaging:</th><td>{packaging}</td></tr>
+<tr><th>Delivery Time</th><td>6 To 15 Days</td></tr>
+</table>"""
+    meta_data = []
+    if rm_title: meta_data.append({"key":"rank_math_title","value":rm_title})
+    if rm_desc:  meta_data.append({"key":"rank_math_description","value":rm_desc})
+    if rm_focus: meta_data.append({"key":"rank_math_focus_keyword","value":rm_focus})
+    payload = {
+        "name": name, "type": t.get("type","simple"),
+        "status": "draft", "regular_price": str(price),
+        "description": table + t.get("description",""),
+        "short_description": t.get("short_description",""),
+        "categories": t.get("categories",[]),
+    }
+    if sku: payload["sku"] = sku
+    if meta_data: payload["meta_data"] = meta_data
+    r = requests.post(f"{BASE}/wp-json/wc/v3/products", json=payload, auth=AUTH, headers=H, timeout=60)
+    r.raise_for_status()
+    return r.json()

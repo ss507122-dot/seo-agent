@@ -332,7 +332,16 @@ async def cloneproduct_cmd(update, ctx):
 
 async def fallback(update, ctx):
     if not await guard(update): return
-    await update.message.reply_text("Type /help to see commands.")
+    user_text = update.message.text
+    await update.message.reply_text("🤖 <i>Agent is analyzing your request just like OpenCloud...</i>", parse_mode="HTML")
+    
+    import internal_linker as il
+    result = il.analyze_and_fix_issue(user_text)
+    
+    if result:
+        await update.message.reply_text(f"✅ <b>Agent Response:</b>\n{result}", parse_mode="HTML")
+    else:
+        await update.message.reply_text("⚠️ Agent process completed. System running stable and proper.")
 
 def main():
     if not TOKEN or not OWNER:
